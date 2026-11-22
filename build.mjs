@@ -424,7 +424,7 @@ ${wa ? `<a class="wa" id="waBtn" href="https://wa.me/${wa}?text=${encodeURICompo
     </div>
   </div>
   <p class="fsecure">Pagamenti sicuri sul checkout ufficiale Shopify: questo sito non tratta i dati della tua carta.</p>
-  <div class="fcopy">© ${new Date().getFullYear()} ${name}${CFG.vatNumber ? ` · P.IVA ${esc(CFG.vatNumber)}` : ""}${CFG.companyLine ? ` · ${esc(CFG.companyLine)}` : ""}</div>
+  <div class="fcopy">© ${new Date().getFullYear()} ${name}${CFG.companyLine ? ` · ${esc(CFG.companyLine)}` : ""}${CFG.vatNumber ? ` · P.IVA ${esc(CFG.vatNumber)}` : ""}</div>
 </footer>
 
 <noscript><p class="noscript">Per navigare il catalogo e acquistare è necessario JavaScript.</p></noscript>
