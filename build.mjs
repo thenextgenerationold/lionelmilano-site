@@ -125,7 +125,7 @@ function normalize(products, colMap) {
       ?? TYPE_CATEGORY[(p.product_type || "").toUpperCase()]
       ?? "Altro";
 
-    items.push({
+    const item = {
       h: p.handle,
       t: titleCase(p.title),
       c: cat,
@@ -137,7 +137,10 @@ function normalize(products, colMap) {
         const cmp = v.compare_at_price ? +v.compare_at_price : null;
         return { id: v.id, s: variantLabel(v), p: price, cp: cmp && cmp > price ? cmp : null, a: !!v.available };
       }),
-    });
+    };
+    // dimensioni delle foto: servono solo in build (non finiscono nel JSON della pagina)
+    Object.defineProperty(item, "dims", { value: p.images.map((i) => ({ w: i.width, h: i.height })), enumerable: false });
+    items.push(item);
   }
   return { items, excluded };
 }
@@ -153,7 +156,22 @@ function buildHtml(items) {
   if (counts.Altro) cats.push("Altro");
 
   const first = (...cs) => { for (const c of cs) { const f = items.find((i) => i.c === c); if (f) return f; } return items[0]; };
-  const hero = first("Abiti", "Giacche & Cappotti");
+  // Foto d'apertura: quella indicata in config, altrimenti la foto verticale a più
+  // alta risoluzione tra giacche e abiti (mai sotto i 1600px: niente ingrandimenti sgranati).
+  let hero = null, heroImg = null;
+  if (CFG.hero?.handle) {
+    hero = items.find((i) => i.h === CFG.hero.handle) || null;
+    if (hero) heroImg = hero.img[CFG.hero.image || 0] || hero.img[0];
+  }
+  if (!hero) {
+    const cand = items.flatMap((i) => (i.dims || []).map((d, k) => ({ i, k, ...d })))
+      .filter((x) => x.w >= 1600 && x.h > x.w && ["Giacche & Cappotti", "Abiti"].includes(x.i.c))
+      .sort((a, b) => b.w * b.h - a.w * a.h)[0];
+    hero = cand ? cand.i : first("Abiti", "Giacche & Cappotti");
+    heroImg = cand ? hero.img[cand.k] : hero.img[0];
+  }
+  const custom = items.filter((i) => /realizzat[ao] a mano|customi[sz]ed/i.test(i.t));
+  const italy = JSON.parse(fs.readFileSync(path.join(SRC, "italy.json"), "utf8"));
   const bannerA = first("Giacche & Cappotti", "Abiti");
   const bannerB = first("Scarpe", "Jeans", "Denim");
   const tiles = cats.filter((c) => c !== "Altro").slice(0, 4).map((c) => ({ c, img: first(c).img[0], n: counts[c] }));
@@ -197,7 +215,7 @@ function buildHtml(items) {
 <meta property="og:type" content="website">
 <meta property="og:title" content="${name}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:image" content="${esc(sized(hero.img[0], 1200))}">
+<meta property="og:image" content="${esc(sized(heroImg, 1200))}">
 ${canonical}
 <meta name="theme-color" content="#141414">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -236,9 +254,31 @@ ${CFG.topbar ? `<div class="topbar">${esc(CFG.topbar)}</div>` : ""}
 
 <main>
   <section class="hero">
-    <img src="${esc(sized(hero.img[0], 1800))}" alt="${esc(hero.t)}" fetchpriority="high">
-    <div class="cap"><div class="kicker">Collezione Uomo</div><h1>Eleganza senza tempo</h1><button class="cta" data-filter="Tutti" data-scroll>Scopri la collezione</button></div>
+    <div class="hero-txt">
+      <div class="kicker">${stores.map((s) => esc(s.city)).join(" · ") || "Collezione Uomo"}</div>
+      <h1>Eleganza<br>senza tempo</h1>
+      <p>Sartoria contemporanea, denim e pezzi unici dipinti a mano. Selezionati in boutique, spediti a casa tua.</p>
+      <div class="hero-cta">
+        <button class="cta dark" data-filter="Tutti" data-scroll>Scopri la collezione</button>
+        ${custom.length ? `<a class="link" href="#unici">Pezzi unici</a>` : ""}
+      </div>
+    </div>
+    <a class="hero-img" href="#/p/${encodeURIComponent(hero.h)}" aria-label="${esc(hero.t)}">
+      <img src="${esc(sized(heroImg, 1200))}" srcset="${[800, 1200, 1600, 2000].map((w) => `${esc(sized(heroImg, w))} ${w}w`).join(", ")}" sizes="(max-width:760px) 100vw, 50vw" alt="${esc(hero.t)}" fetchpriority="high">
+      <span class="hero-tag">${esc(hero.t)}</span>
+    </a>
   </section>
+
+  ${custom.length ? `<section class="unici" id="unici">
+    <div class="unici-head">
+      <div class="kicker">Lionel Sidieu · Custom</div>
+      <h2>Pezzi unici, dipinti a mano</h2>
+      <p>Giacche e denim personalizzati a mano, uno per uno. Quando un pezzo è venduto, non torna.</p>
+    </div>
+    <div class="unici-row">
+      ${custom.map((p) => `<a class="unico" href="#/p/${encodeURIComponent(p.h)}"><img loading="lazy" src="${esc(sized(p.img[0], 700))}" srcset="${esc(sized(p.img[0], 700))} 1x, ${esc(sized(p.img[0], 1400))} 2x" alt="${esc(p.t)}"><span>${esc(p.t)}</span></a>`).join("\n      ")}
+    </div>
+  </section>` : ""}
 
   <div class="sec"><h2>Nuovi arrivi</h2><p>Gli ultimi capi arrivati in boutique</p></div>
   <div class="row" id="rowNew"></div>
@@ -278,13 +318,33 @@ ${CFG.topbar ? `<div class="topbar">${esc(CFG.topbar)}</div>` : ""}
             ${s.phone ? `<a class="store-addr" href="tel:${esc(s.phone.replace(/\s+/g, ""))}">${esc(s.phone)}</a>` : ""}
             <div class="store-dist" id="dist${i}" aria-live="polite"></div>
             <div class="store-act">
-              ${s.lat != null ? `<button class="link" type="button" data-store="${i}">Vedi sulla mappa</button>` : ""}
               <a class="link" href="https://www.google.com/maps/dir/?api=1&amp;destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Indicazioni</a>
             </div>
           </div>
         </article>`).join("")}
       </div>
-      <div class="store-map" id="storeMap" role="region" aria-label="Mappa delle boutique"></div>
+      <div class="italy" role="img" aria-label="Le boutique in Italia: ${stores.map((s) => esc(s.city)).join(" e ")}">
+        <svg viewBox="${italy.viewBox}" preserveAspectRatio="xMidYMid meet">
+          <path class="italy-shape" d="${italy.d}"/>
+          ${(() => {
+            const p = italy.proj;
+            const xy = (s) => [((s.lng * p.k - p.minX) * p.s).toFixed(1), ((-s.lat - p.minY) * p.s).toFixed(1)];
+            const pts = stores.filter((s) => s.lat != null).map((s) => ({ s, i: stores.indexOf(s), xy: xy(s) }));
+            const line = pts.length > 1 ? (() => {
+              const [a, b] = [pts[0].xy.map(Number), pts[1].xy.map(Number)];
+              const mx = (a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.18, my = (a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.18;
+              return `<path class="italy-arc" d="M${a[0]},${a[1]} Q${mx.toFixed(1)},${my.toFixed(1)} ${b[0]},${b[1]}"/>`;
+            })() : "";
+            return line + pts.map(({ s, i, xy: [x, y] }) => {
+              const right = Number(x) < 260;
+              return `<g class="italy-pt" data-store="${i}" tabindex="0" role="button" aria-label="${esc(s.city)}">
+            <circle class="pulse" cx="${x}" cy="${y}" r="7"/><circle class="dot" cx="${x}" cy="${y}" r="6"/>
+            <text x="${right ? Number(x) + 14 : Number(x) - 14}" y="${Number(y) + 5}" text-anchor="${right ? "start" : "end"}">${esc(s.city)}</text>
+          </g>`;
+            }).join("");
+          })()}
+        </svg>
+      </div>
     </div>
   </section>` : ""}
 </main>

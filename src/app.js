@@ -361,76 +361,25 @@
   const fbToggle = () => fb.classList.toggle("show", window.scrollY > 140 && !open.size);
   window.addEventListener("scroll", fbToggle, { passive: true });
 
-  // ── boutique: mappa (Leaflet + OpenStreetMap, caricata solo quando visibile) ──
+  // ── boutique: mappa stilizzata (SVG generato in build, nessuna libreria esterna) ──
   const STORES = D.stores || [];
-  const LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
-  let map = null, mapReady = null;
-  const markers = {};
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve();
-    return new Promise((res, rej) => {
-      const css = document.createElement("link");
-      css.rel = "stylesheet"; css.href = LEAFLET + "leaflet.min.css";
-      document.head.appendChild(css);
-      const s = document.createElement("script");
-      s.src = LEAFLET + "leaflet.min.js"; s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-  const dirUrl = (s) => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(s.a);
-  function overview() {
-    if (!map) return;
-    const pts = STORES.map((s) => [s.lat, s.lng]);
-    if (pts.length === 1) map.setView(pts[0], 15);
-    else map.fitBounds(pts, { padding: [60, 60] });
-  }
-  function initMap() {
-    const el = $("#storeMap");
-    if (!el || !STORES.length) return Promise.resolve(false);
-    if (mapReady) return mapReady;
-    mapReady = loadLeaflet().then(() => {
-      const L = window.L;
-      map = L.map(el, { scrollWheelZoom: false, zoomControl: true });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map);
-      STORES.forEach((s) => {
-        const icon = L.divIcon({ className: "pin", html: `<span><i>${String(s.i + 1).padStart(2, "0")}</i></span>`, iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -32] });
-        markers[s.i] = L.marker([s.lat, s.lng], { icon, title: s.c, keyboard: true }).addTo(map)
-          .bindPopup(`<b>${esc(s.c)}</b><br>${esc(s.a)}<br><a href="${esc(dirUrl(s))}" target="_blank" rel="noopener">Indicazioni →</a>`)
-          .on("click", () => highlight(s.i));
-      });
-      // linea tratteggiata che unisce le boutique
-      if (STORES.length > 1) L.polyline(STORES.map((s) => [s.lat, s.lng]), { className: "route", interactive: false }).addTo(map);
-      overview();
-      return true;
-    }).catch(() => { el.innerHTML = '<p class="dempty">Mappa non disponibile.</p>'; return false; });
-    return mapReady;
-  }
   function highlight(i) {
-    document.querySelectorAll(".store").forEach((c) => c.classList.toggle("on", c.dataset.store === String(i)));
+    document.querySelectorAll(".store, .italy-pt").forEach((el) => el.classList.toggle("on", el.dataset.store === String(i)));
   }
-  function flyTo(i) {
-    highlight(i);
-    initMap().then((ok) => {
-      const m = markers[i]; if (!ok || !m) return;
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) map.setView(m.getLatLng(), 16); else map.flyTo(m.getLatLng(), 16, { duration: 1.6 });
-      map.once("moveend", () => m.openPopup());
-      if (window.innerWidth < 760) $("#storeMap").scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  }
-  if ($("#storeMap")) {
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((en) => { if (en.some((e) => e.isIntersecting)) { io.disconnect(); initMap(); } }, { rootMargin: "300px" });
-      io.observe($("#storeMap"));
-    } else initMap();
-    document.addEventListener("click", (e) => {
-      const card = e.target.closest("[data-store]");
-      if (!card || e.target.closest("a")) return;
-      flyTo(Number(card.dataset.store));
-    });
-  }
+  const flyTo = highlight;
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-store]");
+    if (!el || e.target.closest("a")) return;
+    highlight(Number(el.dataset.store));
+    if (el.classList.contains("italy-pt")) document.querySelector(`.store[data-store="${el.dataset.store}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+  document.addEventListener("keydown", (e) => {
+    const el = e.target.closest && e.target.closest(".italy-pt");
+    if (el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+  });
+  document.querySelectorAll(".store").forEach((c) => {
+    c.addEventListener("mouseenter", () => highlight(Number(c.dataset.store)));
+  });
 
   // "Trova la boutique più vicina": la posizione resta nel browser, nessun invio.
   function km(a, b) {

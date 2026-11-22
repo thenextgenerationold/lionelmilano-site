@@ -9,7 +9,7 @@
   "companyLine": "",
   "contactEmail": "info@lionelmilano.com",
   "social": {
-    "instagram": "",
+    "instagram": "https://www.instagram.com/lionelboutique/",
     "facebook": "",
     "tiktok": ""
   },
@@ -33,5 +33,9 @@
       "phone": ""
     }
   ],
-  "excludeSoldOut": true
+  "excludeSoldOut": true,
+  "hero": {
+    "handle": "senza-titolo-8set_16-12",
+    "image": 0
+  }
 }
