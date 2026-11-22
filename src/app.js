@@ -1,4 +1,4 @@
-/* Lionel Boutique — vetrina statica.
+/* Lionel Milano — vetrina statica.
  * Dati: window.__LB__ generato da site/build.mjs dal catalogo Shopify.
  * Carrello e preferiti: localStorage (solo comodità per il visitatore).
  * Checkout: cart permalink Shopify -> checkout ufficiale.

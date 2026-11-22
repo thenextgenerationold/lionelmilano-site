@@ -1,4 +1,4 @@
-# Sito vetrina Lionel Boutique
+# Sito vetrina Lionel Milano
 
 Sito statico generato dal catalogo **pubblico** del negozio Shopify. Non serve nessun token.
 

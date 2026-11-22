@@ -2,7 +2,7 @@
   "name": "lionelmilano-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Sito vetrina Lionel Boutique (lionelmilano.com) generato dal catalogo Shopify",
+  "description": "Sito vetrina Lionel Milano (lionelmilano.com) generato dal catalogo Shopify",
   "engines": { "node": ">=20" },
   "scripts": {
     "build": "node build.mjs",

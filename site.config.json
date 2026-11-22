@@ -2,7 +2,7 @@
   "shopifyDomain": "67ba46-2.myshopify.com",
   "storeUrl": "https://lionelstudio.com",
   "siteUrl": "https://lionelmilano.com",
-  "brandName": "Lionel Boutique",
+  "brandName": "Lionel Milano",
   "tagline": "Boutique uomo · Milano e San Benedetto del Tronto",
   "topbar": "Pagamento sicuro con checkout Shopify",
   "vatNumber": "",
@@ -15,7 +15,7 @@
   },
   "stores": [
     {
-      "name": "Lionel Boutique",
+      "name": "Lionel Milano",
       "city": "Milano",
       "address": "Corso Magenta 29, 20123 Milano (MI)",
       "lat": 45.46595,
@@ -24,7 +24,7 @@
       "phone": ""
     },
     {
-      "name": "Lionel Boutique",
+      "name": "Lionel Milano",
       "city": "San Benedetto del Tronto",
       "address": "Via Montebello 7, 63074 San Benedetto del Tronto (AP)",
       "lat": 42.95371,

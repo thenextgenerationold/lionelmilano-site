@@ -1,4 +1,4 @@
-// Lionel Boutique — generatore del sito vetrina statico.
+// Lionel Milano — generatore del sito vetrina statico.
 //
 // Scarica il catalogo PUBBLICO del negozio Shopify (products.json, nessun token
 // necessario), scarta i prodotti senza foto (e, se configurato, quelli esauriti)
