@@ -137,6 +137,7 @@
       el.hidden = true;
     }
     document.body.style.overflow = open.size ? "hidden" : "";
+    document.body.classList.toggle("pdp-open", open.has("pdp"));
     $("#backdrop").classList.toggle("show", open.size > 0);
     if (!open.size && lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
@@ -169,6 +170,15 @@
     $("#pdp").scrollTop = 0;
     $("#pdp .pdp-close").focus({ preventScroll: true });
     if (!avail.length) toast("Questo capo è esaurito");
+    setWa(p);
+  }
+  // WhatsApp: messaggio generico, o specifico del capo quando la scheda è aperta.
+  function setWa(p) {
+    const b = $("#waBtn"); if (!b || !D.wa) return;
+    const link = (D.site || location.origin + location.pathname).replace(/\/$/, "") + "/#/p/" + encodeURIComponent(p ? p.h : "");
+    const msg = p ? D.wa.mp.replace("{titolo}", p.t).replace("{link}", link) : D.wa.m;
+    b.href = "https://wa.me/" + D.wa.n + "?text=" + encodeURIComponent(msg);
+    const pw = $("#pdpWa"); if (pw) pw.href = b.href;
   }
   function updatePdp() {
     const p = pdp;
@@ -192,6 +202,7 @@
     if (!open.has("pdp")) return;
     pdp = null; selected = null;
     document.title = BASE_TITLE;
+    setWa(null);
     layer("pdp", false);
   }
   function closePdp() {
