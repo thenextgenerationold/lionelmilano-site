@@ -13,11 +13,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(HERE, "src");
 const DIST = path.join(HERE, "dist");
 const CFG = JSON.parse(fs.readFileSync(path.join(HERE, "site.config.json"), "utf8"));
+
+// versione dei file statici: cambia quando cambia il contenuto (niente cache vecchie)
+const ver = (f) => createHash("sha1").update(fs.readFileSync(path.join(SRC, f))).digest("hex").slice(0, 10);
 
 const SHOP = `https://${CFG.shopifyDomain}`;
 const STORE = CFG.storeUrl.replace(/\/$/, "");
@@ -229,7 +233,7 @@ ${canonical}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=${ver("style.css")}">
 </head>
 <body>
 ${CFG.topbar ? `<div class="topbar">${esc(CFG.topbar)}</div>` : ""}
@@ -425,7 +429,7 @@ ${wa ? `<a class="wa" id="waBtn" href="https://wa.me/${wa}?text=${encodeURICompo
 
 <noscript><p class="noscript">Per navigare il catalogo e acquistare è necessario JavaScript.</p></noscript>
 <script>window.__LB__=${data};</script>
-<script src="app.js" defer></script>
+<script src="app.js?v=${ver("app.js")}" defer></script>
 </body>
 </html>`;
 }
