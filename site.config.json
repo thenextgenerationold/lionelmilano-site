@@ -1,0 +1,17 @@
+{
+  "shopifyDomain": "67ba46-2.myshopify.com",
+  "storeUrl": "https://lionelstudio.com",
+  "siteUrl": "https://lionelmilano.com",
+  "brandName": "Lionel Boutique",
+  "tagline": "Boutique uomo · Porto San Giorgio",
+  "topbar": "Pagamento sicuro con checkout Shopify",
+  "vatNumber": "",
+  "companyLine": "Porto San Giorgio (FM), Italia",
+  "contactEmail": "",
+  "social": {
+    "instagram": "",
+    "facebook": "",
+    "tiktok": ""
+  },
+  "excludeSoldOut": true
+}
