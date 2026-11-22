@@ -228,7 +228,10 @@ function buildHtml(items) {
 <meta property="og:image" content="${esc(sized(heroImg, 1200))}">
 ${canonical}
 <meta name="theme-color" content="#141414">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://cdn.shopify.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -434,7 +437,6 @@ ${wa ? `<a class="wa" id="waBtn" href="https://wa.me/${wa}?text=${encodeURICompo
 </html>`;
 }
 
-const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#141414"/><text x="32" y="44" font-family="Georgia,serif" font-size="38" fill="#fff" text-anchor="middle">L</text></svg>`;
 
 // ── 5. main ────────────────────────────────────────────────────────────────
 console.log(`Catalogo da ${SHOP} ...`);
@@ -447,7 +449,13 @@ fs.mkdirSync(DIST, { recursive: true });
 fs.writeFileSync(path.join(DIST, "index.html"), buildHtml(items));
 fs.copyFileSync(path.join(SRC, "style.css"), path.join(DIST, "style.css"));
 fs.copyFileSync(path.join(SRC, "app.js"), path.join(DIST, "app.js"));
-fs.writeFileSync(path.join(DIST, "favicon.svg"), FAVICON);
+// icone (L nel font del logo) e manifest
+for (const f of fs.readdirSync(path.join(HERE, "static"))) fs.copyFileSync(path.join(HERE, "static", f), path.join(DIST, f));
+fs.writeFileSync(path.join(DIST, "site.webmanifest"), JSON.stringify({
+  name: CFG.brandName, short_name: CFG.brandName, start_url: "./", display: "standalone",
+  background_color: "#ffffff", theme_color: "#141414",
+  icons: [{ src: "icon-192.png", sizes: "192x192", type: "image/png" }, { src: "icon-512.png", sizes: "512x512", type: "image/png" }],
+}));
 fs.writeFileSync(path.join(DIST, "robots.txt"), `User-agent: *\nAllow: /\n${CFG.siteUrl ? `Sitemap: ${CFG.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`);
 if (CFG.siteUrl) fs.writeFileSync(path.join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${esc(CFG.siteUrl)}</loc></url></urlset>\n`);
 
