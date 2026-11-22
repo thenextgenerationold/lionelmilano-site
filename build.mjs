@@ -180,7 +180,11 @@ function buildHtml(items) {
   const [logoA, ...logoRest] = CFG.brandName.split(" ");
   const desc = `${CFG.brandName} — ${CFG.tagline}. ${items.length} capi uomo: abiti, giacche, denim, scarpe.`;
   const canonical = CFG.siteUrl ? `<link rel="canonical" href="${esc(CFG.siteUrl)}">\n<meta property="og:url" content="${esc(CFG.siteUrl)}">` : "";
-  const data = JSON.stringify({ items, cats, store: STORE }).replace(/</g, "\\u003c");
+  const stores = (CFG.stores || []).filter((s) => s.name && s.address);
+  const data = JSON.stringify({
+    items, cats, store: STORE,
+    stores: stores.map((s, i) => ({ i, n: s.name, c: s.city, a: s.address, lat: s.lat, lng: s.lng })).filter((s) => s.lat != null && s.lng != null),
+  }).replace(/</g, "\\u003c");
   const pol = (p) => `${STORE}/policies/${p}`;
 
   return `<!doctype html>
@@ -259,6 +263,30 @@ ${CFG.topbar ? `<div class="topbar">${esc(CFG.topbar)}</div>` : ""}
 
   <div class="sec" id="shop"><h2 id="shopTitle">Tutto l'Uomo</h2><p id="count"></p></div>
   <div class="grid" id="grid"></div>
+
+  ${stores.length ? `<section class="stores" id="negozi">
+    <div class="sec"><h2>Le Boutique</h2><p>${stores.length > 1 ? "Da Milano all'Adriatico: vieni a provare i capi di persona" : "Vieni a provare i capi di persona"}</p></div>
+    <div class="stores-in">
+      <div class="store-list">
+        ${stores.length > 1 ? `<button class="near" id="nearBtn" type="button"><span class="near-dot"></span><span id="nearTxt">Trova la boutique più vicina a te</span></button>` : ""}
+        ${stores.map((s, i) => `<article class="store" data-store="${i}">
+          <div class="store-idx">${String(i + 1).padStart(2, "0")}</div>
+          <div class="store-body">
+            <h3 class="store-city">${esc(s.city)}</h3>
+            <div class="store-addr">${esc(s.address)}</div>
+            ${s.hours ? `<div class="store-addr">${esc(s.hours)}</div>` : ""}
+            ${s.phone ? `<a class="store-addr" href="tel:${esc(s.phone.replace(/\s+/g, ""))}">${esc(s.phone)}</a>` : ""}
+            <div class="store-dist" id="dist${i}" aria-live="polite"></div>
+            <div class="store-act">
+              ${s.lat != null ? `<button class="link" type="button" data-store="${i}">Vedi sulla mappa</button>` : ""}
+              <a class="link" href="https://www.google.com/maps/dir/?api=1&amp;destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Indicazioni</a>
+            </div>
+          </div>
+        </article>`).join("")}
+      </div>
+      <div class="store-map" id="storeMap" role="region" aria-label="Mappa delle boutique"></div>
+    </div>
+  </section>` : ""}
 </main>
 
 <div class="backdrop" id="backdrop"></div>
@@ -301,7 +329,7 @@ ${CFG.topbar ? `<div class="topbar">${esc(CFG.topbar)}</div>` : ""}
     <div class="fcol"><h4>Assistenza</h4>
       <a href="${pol("shipping-policy")}" rel="noopener">Spedizioni</a>
       <a href="${pol("refund-policy")}" rel="noopener">Resi e rimborsi</a>
-      <a href="${STORE}/pages/contact" rel="noopener">Contattaci</a>
+      ${stores.length ? `<a href="#negozi">I nostri negozi</a>` : ""}
       ${CFG.contactEmail ? `<a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>` : ""}
       <a href="${STORE}/account" rel="noopener">Il mio account</a>
     </div>

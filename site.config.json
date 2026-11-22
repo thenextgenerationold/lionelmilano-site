@@ -3,15 +3,35 @@
   "storeUrl": "https://lionelstudio.com",
   "siteUrl": "https://lionelmilano.com",
   "brandName": "Lionel Boutique",
-  "tagline": "Boutique uomo · Porto San Giorgio",
+  "tagline": "Boutique uomo · Milano e San Benedetto del Tronto",
   "topbar": "Pagamento sicuro con checkout Shopify",
   "vatNumber": "",
-  "companyLine": "Porto San Giorgio (FM), Italia",
-  "contactEmail": "",
+  "companyLine": "",
+  "contactEmail": "info@lionelmilano.com",
   "social": {
     "instagram": "",
     "facebook": "",
     "tiktok": ""
   },
+  "stores": [
+    {
+      "name": "Lionel Boutique",
+      "city": "Milano",
+      "address": "Corso Magenta 29, 20123 Milano (MI)",
+      "lat": 45.46595,
+      "lng": 9.17674,
+      "hours": "",
+      "phone": ""
+    },
+    {
+      "name": "Lionel Boutique",
+      "city": "San Benedetto del Tronto",
+      "address": "Via Montebello 7, 63074 San Benedetto del Tronto (AP)",
+      "lat": 42.95371,
+      "lng": 13.88081,
+      "hours": "",
+      "phone": ""
+    }
+  ],
   "excludeSoldOut": true
 }
