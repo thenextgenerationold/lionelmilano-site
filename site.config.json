@@ -37,5 +37,10 @@
   "hero": {
     "handle": "senza-titolo-8set_16-12",
     "image": 0
+  },
+  "whatsapp": {
+    "number": "+39 327 490 7520",
+    "message": "Ciao Lionel, ti scrivo dal sito: vorrei qualche informazione.",
+    "productMessage": "Ciao Lionel, mi interessa questo capo: {titolo} {link}"
   }
 }
