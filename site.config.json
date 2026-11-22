@@ -42,5 +42,6 @@
     "number": "+39 327 490 7520",
     "message": "Ciao Lionel, ti scrivo dal sito: vorrei qualche informazione.",
     "productMessage": "Ciao Lionel, mi interessa questo capo: {titolo} {link}"
-  }
+  },
+  "phone": "+39 327 490 7520"
 }

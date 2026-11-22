@@ -201,6 +201,7 @@ function buildHtml(items) {
   const stores = (CFG.stores || []).filter((s) => s.name && s.address);
   // WhatsApp: solo cifre, prefisso internazionale incluso (es. 393331234567)
   const wa = String(CFG.whatsapp?.number || "").replace(/\D/g, "");
+  const phone = CFG.phone || CFG.whatsapp?.number || "";
   const waMsg = CFG.whatsapp?.message || "Ciao Lionel, ti scrivo dal sito: vorrei qualche informazione.";
   const data = JSON.stringify({
     items, cats, store: STORE,
@@ -397,26 +398,28 @@ ${wa ? `<a class="wa" id="waBtn" href="https://wa.me/${wa}?text=${encodeURICompo
 
 <footer>
   <div class="fcols">
+    <div class="fcol fcontact"><h4>Contatti</h4>
+      ${phone ? `<a href="tel:${esc(phone.replace(/[^\d+]/g, ""))}"><span class="fk">Telefono</span>${esc(phone)}</a>` : ""}
+      ${wa ? `<a href="https://wa.me/${wa}?text=${encodeURIComponent(waMsg)}" target="_blank" rel="noopener"><span class="fk">WhatsApp</span>${esc(phone || "+" + wa)}</a>` : ""}
+      ${CFG.contactEmail ? `<a href="mailto:${esc(CFG.contactEmail)}"><span class="fk">Email</span>${esc(CFG.contactEmail)}</a>` : ""}
+      ${socials.length ? `<div class="social">${socials.map(([k, u]) => `<a href="${esc(u)}" aria-label="${k}" rel="noopener" target="_blank">${SOCIAL_ICON[k] || k}</a>`).join("")}</div>` : ""}
+    </div>
+    ${stores.length ? `<div class="fcol fstores"><h4>Le Boutique</h4>
+      ${stores.map((s) => `<a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(s.address)}" target="_blank" rel="noopener"><span class="fk">${esc(s.city)}</span>${esc(s.address)}${s.phone ? `<br>${esc(s.phone)}` : ""}${s.hours ? `<br>${esc(s.hours)}` : ""}</a>`).join("")}
+    </div>` : ""}
     <div class="fcol"><h4>Assistenza</h4>
       <a href="${pol("shipping-policy")}" rel="noopener">Spedizioni</a>
       <a href="${pol("refund-policy")}" rel="noopener">Resi e rimborsi</a>
-      ${stores.length ? `<a href="#negozi">I nostri negozi</a>` : ""}
-      ${CFG.contactEmail ? `<a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>` : ""}
       <a href="${STORE}/account" rel="noopener">Il mio account</a>
-    </div>
-    <div class="fcol"><h4>Categorie</h4>
-      ${cats.slice(0, 7).map((c) => `<button data-filter="${esc(c)}" data-scroll>${esc(c)}</button>`).join("")}
-      ${hasSale ? `<button data-filter="__sale" data-scroll>Saldi</button>` : ""}
-    </div>
-    <div class="fcol"><h4>Legale</h4>
       <a href="${pol("privacy-policy")}" rel="noopener">Privacy Policy</a>
       <a href="${pol("terms-of-service")}" rel="noopener">Termini e Condizioni</a>
     </div>
-    <div class="fcol"><h4>Acquisti sicuri</h4>
-      <p class="fnote">Il pagamento avviene sul checkout ufficiale Shopify. Questo sito non tratta i dati della tua carta.</p>
-      ${socials.length ? `<h4 class="mt">Seguici</h4><div class="social">${socials.map(([k, u]) => `<a href="${esc(u)}" aria-label="${k}" rel="noopener" target="_blank">${SOCIAL_ICON[k] || k}</a>`).join("")}</div>` : ""}
+    <div class="fcol"><h4>Categorie</h4>
+      ${cats.slice(0, 6).map((c) => `<button data-filter="${esc(c)}" data-scroll>${esc(c)}</button>`).join("")}
+      ${hasSale ? `<button data-filter="__sale" data-scroll>Saldi</button>` : ""}
     </div>
   </div>
+  <p class="fsecure">Pagamenti sicuri sul checkout ufficiale Shopify: questo sito non tratta i dati della tua carta.</p>
   <div class="fcopy">© ${new Date().getFullYear()} ${name}${CFG.vatNumber ? ` · P.IVA ${esc(CFG.vatNumber)}` : ""}${CFG.companyLine ? ` · ${esc(CFG.companyLine)}` : ""}</div>
 </footer>
 
